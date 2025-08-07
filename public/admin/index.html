@@ -25,6 +25,13 @@
         document.body.appendChild(info);
         setTimeout(() => info.remove(), 8000);
       }
+      // Redirigir al editor si se recibe un mensaje de autorización de GitHub
+      if (typeof ev.data === "string" && ev.data.startsWith("authorization:github:")) {
+        location.hash = "#/collections/blog/new";
+      }
+      if (ev.data && typeof ev.data === "object" && ev.data.type === "decap-auth" && ev.data.token) {
+        location.hash = "#/collections/blog/new";
+      }
     }, false);
 
     (function initCMS() {
@@ -33,6 +40,10 @@
           if (!window.CMS) throw new Error("Decap CMS no disponible");
           // Cargar configuración desde /config.yml (raíz de /public)
           window.CMS.init({ config: "/config.yml" });
+          // Establecer una ruta por defecto si no hay hash
+          if (!location.hash || location.hash === "#/") {
+            location.hash = "#/collections/blog";
+          }
         } catch (e) {
           console.error(e);
           document.body.insertAdjacentHTML("afterbegin",
