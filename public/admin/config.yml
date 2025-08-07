@@ -3,7 +3,7 @@
 
 backend:
   name: github
-  repo: tu-org/tu-repo
+  repo: https://github.com/faverl/blog-rf.git
   branch: main
 
 publish_mode: editorial_workflow
