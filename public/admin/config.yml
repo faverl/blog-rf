@@ -1,0 +1,55 @@
+# Configuración de Decap CMS para Next.js (sirviendo /admin como HTML estático)
+# Asegúrate de reemplazar "tu-org/tu-repo" y la rama correcta.
+
+backend:
+  name: github
+  repo: tu-org/tu-repo
+  branch: main
+
+publish_mode: editorial_workflow
+locale: es
+logo_url: /favicon.svg
+
+# Requeridos: dónde se guardan y cómo se sirven los medios
+media_folder: public/uploads
+public_folder: /uploads
+
+# Opcional pero recomendado: librería de medios por defecto integrada
+media_library:
+  name: "default"
+
+# Colecciones (requeridas). Ajusta rutas si usas otras carpetas.
+collections:
+  - name: blog
+    label: "Blog"
+    label_singular: "Entrada de Blog"
+    folder: "content/blog"
+    create: true
+    slug: "{{slug}}"
+    editor:
+      preview: true
+    fields:
+      - { label: "Título", name: "title", widget: "string" }
+      - { label: "Fecha", name: "date", widget: "datetime" }
+      - { label: "Autor", name: "author", widget: "string" }
+      - { label: "Imagen destacada", name: "featuredImage", widget: "image", required: false }
+      - { label: "Resumen", name: "excerpt", widget: "text", required: false }
+      - { label: "Borrador", name: "draft", widget: "boolean", default: false, required: false }
+      - { label: "Contenido", name: "body", widget: "markdown" }
+
+  - name: news
+    label: "Noticias"
+    label_singular: "Noticia"
+    folder: "content/news"
+    create: true
+    slug: "{{slug}}"
+    editor:
+      preview: true
+    fields:
+      - { label: "Título", name: "title", widget: "string" }
+      - { label: "Fecha", name: "date", widget: "datetime" }
+      - { label: "Autor", name: "author", widget: "string" }
+      - { label: "Imagen destacada", name: "featuredImage", widget: "image", required: false }
+      - { label: "Resumen", name: "excerpt", widget: "text", required: false }
+      - { label: "Borrador", name: "draft", widget: "boolean", default: false, required: false }
+      - { label: "Contenido", name: "body", widget: "markdown" }
