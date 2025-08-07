@@ -1,65 +1,102 @@
 <!doctype html>
 <html lang="es">
 <head>
-<meta charset="utf-8" />
-<title>Decap CMS</title>
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="robots" content="noindex, nofollow" />
-<style>html,body{height:100%;margin:0}#nc-root,body{background:#fff}</style>
-<script>
-  // Evita doble inicialización (fuente del error removeChild)
-  window.CMS_MANUAL_INIT = true;
-</script>
+  <meta charset="utf-8" />
+  <title>Decap CMS</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <style>
+    html,body{height:100%;margin:0}
+    body{background:#fff}
+    #nc-root{min-height:100vh}
+    #decap-debug{position:fixed;bottom:8px;left:8px;background:#111;color:#fff;padding:8px 10px;border-radius:8px;font:12px/1.3 system-ui;z-index:99999}
+  </style>
+  <script>
+    // Evita doble inicialización
+    window.CMS_MANUAL_INIT = true;
+  </script>
 </head>
 <body>
-<script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js" defer></script>
-<script>
-  window.addEventListener("message", (ev) => {
-    console.log("[Decap OAuth message]", ev.data);
-    // Badge de debug opcional
-    if (ev.data && ev.data.type === "decap-auth") {
-      const info = document.getElementById("decap-debug") || document.createElement("div");
-      info.id = "decap-debug";
-      info.style.cssText = "position:fixed;bottom:8px;left:8px;background:#111;color:#fff;padding:8px 10px;border-radius:8px;font:12px/1.3 system-ui;z-index:99999";
-      info.textContent = "Autenticado como: " + (ev.data.user || "desconocido");
-      document.body.appendChild(info);
-      setTimeout(() => info.remove(), 8000);
-    }
+  <!-- Contenedor explícito para el panel -->
+  <div id="nc-root"></div>
 
-    const isAuthString = typeof ev.data === "string" && ev.data.startsWith("authorization:github:");
-    const isAuthObject = ev.data && typeof ev.data === "object" && ev.data.type === "decap-auth" && ev.data.token;
+  <!-- Carga Decap CMS -->
+  <script src="https://unpkg.com/decap-cms@3.3.0/dist/decap-cms.js" defer></script>
 
-    if (isAuthString || isAuthObject) {
-      // Da tiempo a Decap a guardar el token en storage y montar el panel
-      setTimeout(() => {
-        const hash = location.hash || "#/";
-        if (hash === "#/" || hash === "#/login") {
-          location.hash = "#/collections/blog/new";
-        }
-      }, 800);
-    }
-  }, false);
+  <script>
+    // Debug de OAuth: ver mensajes del popup
+    window.addEventListener("message", (ev) => {
+      console.log("[Decap OAuth message]", ev.data);
 
-  (function initCMS() {
-    function start() {
-      try {
-        if (!window.CMS) throw new Error("Decap CMS no disponible");
-        // Cargar configuración desde /config.yml (raíz de /public)
-        window.CMS.init({ config: "/config.yml" });
-        // Establecer una ruta por defecto si no hay hash
-        if (!location.hash || location.hash === "#/") {
-          location.hash = "#/";
-        }
-      } catch (e) {
-        console.error(e);
-        document.body.insertAdjacentHTML("afterbegin",
-          '<div style="padding:1rem;font-family:system-ui,Arial">Error cargando Decap CMS. Revisa la consola y que /config.yml exista.</div>'
-        );
+      // Badge visual de usuario autenticado
+      if (ev.data && ev.data.type === "decap-auth") {
+        showDebug("Autenticado como: " + (ev.data.user || "desconocido"));
       }
+
+      const isAuthString = typeof ev.data === "string" && ev.data.startsWith("authorization:github:");
+      const isAuthObject = ev.data && typeof ev.data === "object" && ev.data.type === "decap-auth" && ev.data.token;
+
+      if (isAuthString || isAuthObject) {
+        // Dale tiempo a Decap a procesar y persistir el token
+        setTimeout(() => {
+          if (!location.hash || location.hash === "#/" || location.hash === "#/login") {
+            location.hash = "#/collections/blog";
+          }
+        }, 800);
+      }
+    }, false);
+
+    function showDebug(text) {
+      let info = document.getElementById("decap-debug");
+      if (!info) {
+        info = document.createElement("div");
+        info.id = "decap-debug";
+        document.body.appendChild(info);
+      }
+      info.textContent = text;
+      clearTimeout(window.__decapDebugTO);
+      window.__decapDebugTO = setTimeout(() => info.remove(), 6000);
     }
-    if (document.readyState === "complete") start();
-    else window.addEventListener("load", start, { once: true });
-  })();
-</script>
+
+    // Espera a que window.CMS exista antes de inicializar
+    (function initCMSWhenReady() {
+      function start() {
+        try {
+          if (!window.CMS) throw new Error("Decap CMS no disponible todavía");
+
+          // Opcional: comprobar que /config.yml responde 200 antes de init (ayuda a diagnosticar)
+          fetch("/config.yml", { cache: "no-store" })
+            .then((r) => {
+              if (!r.ok) throw new Error("No se pudo leer /config.yml (" + r.status + ")");
+              return r.text();
+            })
+            .then(() => {
+              window.CMS.init({ config: "/config.yml" });
+
+              // Si entras sin hash, deja el login por defecto. El panel redirigirá cuando monte.
+              if (!location.hash) {
+                location.hash = "#/";
+              }
+            })
+            .catch((e) => {
+              console.error(e);
+              document.body.insertAdjacentHTML("afterbegin",
+                '<div style="padding:1rem;font-family:system-ui,Arial">No se pudo cargar /config.yml. Abre '+location.origin+'/config.yml en otra pestaña y revisa.</div>'
+              );
+            });
+        } catch (e) {
+          console.error(e);
+          setTimeout(waitForCMS, 100);
+        }
+      }
+      function waitForCMS() {
+        if (window.CMS) return start();
+        setTimeout(waitForCMS, 50);
+      }
+      // Tras load, empieza a esperar a CMS
+      if (document.readyState === "complete") waitForCMS();
+      else window.addEventListener("load", waitForCMS, { once: true });
+    })();
+  </script>
 </body>
 </html>
