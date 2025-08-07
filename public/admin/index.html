@@ -7,31 +7,26 @@
     <meta name="robots" content="noindex, nofollow" />
     <style>
       html, body { height: 100%; margin: 0; }
-      /* Evitar scroll-jumps durante la carga */
       #nc-root, body { background: #fff; }
     </style>
     <script>
-      // Evitar auto-inicialización para prevenir dobles montajes
+      // Evita dobles montajes (causa removeChild) y sigue la guía para Next.js
       window.CMS_MANUAL_INIT = true;
     </script>
   </head>
   <body>
-     El CMS reemplazará el documento 
     <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js" defer></script>
     <script>
       (function initCMS() {
         function start() {
-          try {
-            if (!window.CMS) throw new Error("Decap CMS no disponible");
-            // Inicialización única y explícita con el archivo de configuración
-            window.CMS.init({ config: "/admin/config.yml" });
-          } catch (e) {
-            console.error(e);
-            document.body.insertAdjacentHTML(
-              "afterbegin",
-              '<div style="padding:1rem;font-family:system-ui,Arial">Error cargando Decap CMS. Revisa la consola y que /admin/config.yml exista.</div>'
-            );
+          if (!window.CMS) {
+            console.error("Decap CMS no disponible");
+            document.body.insertAdjacentHTML("afterbegin",
+              '<div style="padding:1rem;font-family:system-ui,Arial">Error cargando Decap CMS.</div>');
+            return;
           }
+          // Lee /admin/config.yml estático desde /public
+          window.CMS.init({ config: "/admin/config.yml" });
         }
         if (document.readyState === "complete") start();
         else window.addEventListener("load", start, { once: true });

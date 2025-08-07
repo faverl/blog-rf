@@ -1,24 +1,26 @@
-# Configuración de Decap CMS para Next.js (sirviendo /admin como HTML estático)
-# Asegúrate de reemplazar "tu-org/tu-repo" y la rama correcta.
-
+# Configuración Decap CMS para Next.js sirviendo /admin desde /public
+# IMPORTANTE: repo usa el formato "owner/repo", no una URL.
 backend:
   name: github
-  repo: https://github.com/faverl/blog-rf.git
+  repo: faverl/blog-rf         # <-- CORREGIDO
   branch: main
+  # Si usas el flujo OAuth propio (recomendado):
+  # base_url: "https://TU-DOMINIO"   # CAMBIA por tu dominio en Vercel
+  # auth_endpoint: "/api/decap/auth"
 
 publish_mode: editorial_workflow
 locale: es
 logo_url: /favicon.svg
 
-# Requeridos: dónde se guardan y cómo se sirven los medios
+# Requeridos para medios
 media_folder: public/uploads
 public_folder: /uploads
 
-# Opcional pero recomendado: librería de medios por defecto integrada
+# Añadimos media_library para satisfacer validadores y usar la lib por defecto
 media_library:
   name: "default"
 
-# Colecciones (requeridas). Ajusta rutas si usas otras carpetas.
+# Colecciones de contenido
 collections:
   - name: blog
     label: "Blog"
@@ -26,8 +28,7 @@ collections:
     folder: "content/blog"
     create: true
     slug: "{{slug}}"
-    editor:
-      preview: true
+    editor: { preview: true }
     fields:
       - { label: "Título", name: "title", widget: "string" }
       - { label: "Fecha", name: "date", widget: "datetime" }
@@ -43,8 +44,7 @@ collections:
     folder: "content/news"
     create: true
     slug: "{{slug}}"
-    editor:
-      preview: true
+    editor: { preview: true }
     fields:
       - { label: "Título", name: "title", widget: "string" }
       - { label: "Fecha", name: "date", widget: "datetime" }
