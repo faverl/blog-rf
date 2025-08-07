@@ -1,35 +1,48 @@
 <!doctype html>
 <html lang="es">
-  <head>
-    <meta charset="utf-8" />
-    <title>Decap CMS</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="robots" content="noindex, nofollow" />
-    <style>html,body{height:100%;margin:0}#nc-root,body{background:#fff}</style>
-    <script>
-      // Evita doble inicialización (fuente del error removeChild)
-      window.CMS_MANUAL_INIT = true;
-    </script>
-  </head>
-  <body>
-    <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js" defer></script>
-    <script>
-      (function initCMS() {
-        function start() {
-          try {
-            if (!window.CMS) throw new Error("Decap CMS no disponible");
-            // Cargar configuración desde /config.yml (raíz de /public)
-            window.CMS.init({ config: "/config.yml" });
-          } catch (e) {
-            console.error(e);
-            document.body.insertAdjacentHTML("afterbegin",
-              '<div style="padding:1rem;font-family:system-ui,Arial">Error cargando Decap CMS. Revisa la consola y que /config.yml exista.</div>'
-            );
-          }
+<head>
+  <meta charset="utf-8" />
+  <title>Decap CMS</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <style>html,body{height:100%;margin:0}#nc-root,body{background:#fff}</style>
+  <script>
+    // Evita doble inicialización (fuente del error removeChild)
+    window.CMS_MANUAL_INIT = true;
+  </script>
+</head>
+<body>
+  <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js" defer></script>
+  <script>
+    window.addEventListener("message", (ev) => {
+      console.log("[Decap OAuth message]", ev.data);
+      // Si quieres, muestra en pantalla cuando llegue el usuario:
+      if (ev.data && ev.data.type === "decap-auth") {
+        const info = document.getElementById("decap-debug") || document.createElement("div");
+        info.id = "decap-debug";
+        info.style.cssText = "position:fixed;bottom:8px;left:8px;background:#111;color:#fff;padding:8px 10px;border-radius:8px;font:12px/1.3 system-ui;z-index:99999";
+        info.textContent = "Autenticado como: " + (ev.data.user || "desconocido");
+        document.body.appendChild(info);
+        setTimeout(() => info.remove(), 8000);
+      }
+    }, false);
+
+    (function initCMS() {
+      function start() {
+        try {
+          if (!window.CMS) throw new Error("Decap CMS no disponible");
+          // Cargar configuración desde /config.yml (raíz de /public)
+          window.CMS.init({ config: "/config.yml" });
+        } catch (e) {
+          console.error(e);
+          document.body.insertAdjacentHTML("afterbegin",
+            '<div style="padding:1rem;font-family:system-ui,Arial">Error cargando Decap CMS. Revisa la consola y que /config.yml exista.</div>'
+          );
         }
-        if (document.readyState === "complete") start();
-        else window.addEventListener("load", start, { once: true });
-      })();
-    </script>
-  </body>
+      }
+      if (document.readyState === "complete") start();
+      else window.addEventListener("load", start, { once: true });
+    })();
+  </script>
+</body>
 </html>
