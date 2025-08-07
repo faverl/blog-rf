@@ -4,9 +4,11 @@ backend:
   name: github
   repo: faverl/blog-rf         # <-- CORREGIDO
   branch: main
-  # Si usas el flujo OAuth propio (recomendado):
-  # base_url: "https://TU-DOMINIO"   # CAMBIA por tu dominio en Vercel
-  # auth_endpoint: "/api/decap/auth"
+  base_url: "https://blog-rf.vercel.app"   # CAMBIA si tu dominio de Vercel es otro
+  auth_endpoint: "/api/decap/auth"
+
+# Opcional (recomendado) para desarrollo local sin OAuth:
+local_backend: true
 
 publish_mode: editorial_workflow
 locale: es
