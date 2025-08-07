@@ -1,23 +1,21 @@
-# Decap CMS + Next.js sirviendo /admin desde /public (según docs)
+# Decap CMS + Next.js + Vercel (backend: GitHub)
 backend:
   name: github
-  repo: faverl/blog-rf        # Formato owner/repo (no URL)
+  repo: faverl/blog-rf      # owner/repo (no URL)
   branch: main
-  base_url: "https://blog-rf.vercel.app"  # Tu dominio en Vercel
-  auth_endpoint: "/api/decap/auth"        # Endpoint OAuth implementado en Next.js
-
-# En local puedes habilitar proxy para pruebas sin OAuth:
-# local_backend: true
+  base_url: "https://blog-rf.vercel.app"  # cambia si tu dominio es otro
+  auth_endpoint: "/api/decap/auth"        # endpoint OAuth en este proyecto
 
 publish_mode: editorial_workflow
 locale: es
 logo_url: /favicon.svg
 
-# Requeridos para gestionar medios
-media_folder: public/uploads
-public_folder: /uploads
-media_library:
-  name: "default"
+# Ubicación de medios (requerido)
+media_folder: public/uploads     # se guarda en el repo
+public_folder: /uploads          # se sirve en el sitio
+
+# Importante: no declares media_library: "default"
+# (la librería integrada ya viene incluida; declarar "default" provoca error)
 
 collections:
   - name: blog

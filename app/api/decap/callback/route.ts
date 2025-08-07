@@ -6,7 +6,7 @@ export async function GET(req: Request) {
   const state = url.searchParams.get("state")
   const cookieState = getCookie(req, "decap_oauth_state")
 
-  if (!code || !state || !cookieState || cookieState !== state) {
+  if (!code || !state || cookieState !== state) {
     return new NextResponse("Estado inválido en OAuth", { status: 400 })
   }
 
@@ -33,14 +33,16 @@ export async function GET(req: Request) {
   }
   const data = (await tokenRes.json()) as { access_token?: string }
 
+  // Devuelve el token al popup del CMS
   const html = `<!doctype html><html><body><script>
-  (function(){
-    function send(m){ try{ window.opener && window.opener.postMessage(m, "*"); }catch(e){} }
-    send('authorizing:github');
-    var t=${JSON.stringify(data.access_token || "")};
-    if(t){ send('authorization:github:'+t); } else { send('authorization:github:error'); }
-    window.close();
-  })();</script></body></html>`
+    (function(){
+      function send(m){ try{ window.opener && window.opener.postMessage(m, "*"); }catch(e){} }
+      send('authorizing:github');
+      var t=${JSON.stringify(data.access_token || "")};
+      if(t){ send('authorization:github:'+t); } else { send('authorization:github:error'); }
+      window.close();
+    })();
+  </script></body></html>`
 
   const res = new NextResponse(html, { status: 200, headers: { "Content-Type": "text/html; charset=utf-8" } })
   res.cookies.set("decap_oauth_state", "", { expires: new Date(0), path: "/api/decap" })

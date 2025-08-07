@@ -7,7 +7,7 @@
     <meta name="robots" content="noindex, nofollow" />
     <style>html,body{height:100%;margin:0}#nc-root,body{background:#fff}</style>
     <script>
-      // Evita doble inicialización (causa removeChild) en entornos con recarga
+      // Evita doble inicialización (fuente del error removeChild)
       window.CMS_MANUAL_INIT = true;
     </script>
   </head>
@@ -18,13 +18,12 @@
         function start() {
           try {
             if (!window.CMS) throw new Error("Decap CMS no disponible");
-            // Cargar configuración estática desde /public/admin/config.yml
-            window.CMS.init({ config: "/admin/config.yml" });
+            // Cargar configuración desde /config.yml (raíz de /public)
+            window.CMS.init({ config: "/config.yml" });
           } catch (e) {
             console.error(e);
-            document.body.insertAdjacentHTML(
-              "afterbegin",
-              '<div style="padding:1rem;font-family:system-ui,Arial">Error cargando Decap CMS. Revisa la consola y que /admin/config.yml exista.</div>'
+            document.body.insertAdjacentHTML("afterbegin",
+              '<div style="padding:1rem;font-family:system-ui,Arial">Error cargando Decap CMS. Revisa la consola y que /config.yml exista.</div>'
             );
           }
         }

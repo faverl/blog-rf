@@ -2,11 +2,12 @@ import { NextResponse } from "next/server"
 import { randomUUID } from "crypto"
 
 export async function GET(req: Request) {
-  const state = randomUUID()
   const url = new URL(req.url)
+  const state = randomUUID()
   const redirectUri = `${url.origin}/api/decap/callback`
+
   const clientId = process.env.GITHUB_CLIENT_ID
-  const scope = process.env.GITHUB_OAUTH_SCOPE || "repo"
+  const scope = process.env.GITHUB_OAUTH_SCOPE || "repo" // usa public_repo si tu repo es público
 
   if (!clientId) return new NextResponse("Falta GITHUB_CLIENT_ID", { status: 500 })
 
